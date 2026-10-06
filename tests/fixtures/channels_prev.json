@@ -1,0 +1,2 @@
+{"columns": ["ym:s:lastsignTrafficSource", "ym:s:visits", "ym:s:bounceRate", "ym:s:goal123reaches"],
+ "rows": [["ad", 7000, 28.0, 160], ["organic", 2900, 21.0, 85], ["direct", 1400, 41.0, 12]]}

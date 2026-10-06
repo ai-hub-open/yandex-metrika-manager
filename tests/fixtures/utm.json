@@ -1,0 +1,3 @@
+{"columns": ["ym:s:lastsignUTMSource", "ym:s:lastsignUTMMedium", "ym:s:lastsignUTMCampaign", "ym:s:visits"],
+ "rows": [["yandex", "cpc", "123", 9800], ["Yandex", "cpc", "124", 2100], ["ya", "CPC-search", "{campaign_id}", 640],
+          ["vk", "cpm", "spring", 1200], [null, null, null, 3000]]}

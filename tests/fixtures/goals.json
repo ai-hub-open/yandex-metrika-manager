@@ -1,0 +1,8 @@
+{"success": true, "data": {"goals": [
+ {"id": 1, "name": "Просмотр 2 страниц", "type": "number", "depth": 2, "reaches": 18950, "conversion_rate": 46.0},
+ {"id": 2, "name": "[Макро] Заявка — отправлена", "type": "action", "conditions": [{"type": "exact", "url": "form_lead_sent"}], "reaches": 812, "conversion_rate": 1.97},
+ {"id": 3, "name": "Цель 3", "type": "url", "conditions": [{"type": "contain", "url": "/thanks"}], "reaches": 0, "conversion_rate": 0},
+ {"id": 4, "name": "Спасибо дубль", "type": "url", "conditions": [{"type": "contain", "url": "/thanks"}], "reaches": 0, "conversion_rate": 0},
+ {"id": 5, "name": "Клик по телефону", "type": "phone", "reaches": 6, "conversion_rate": 0.01},
+ {"id": 6, "name": "Корзина", "type": "url", "conditions": [{"type": "contain", "url": "order"}], "reaches": 900, "conversion_rate": 2.2}
+]}}

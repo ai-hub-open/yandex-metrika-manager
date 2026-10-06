@@ -1,0 +1,3 @@
+{"success": true, "data": {"columns": ["ym:s:lastsignTrafficSource", "ym:s:visits", "ym:s:bounceRate", "ym:s:goal123reaches"],
+ "rows": [["ad", 5000, 30.5, 100], ["organic", 3000, 20.1, 90], ["direct", 1500, 40.0, 10], ["social", 40, 50.0, 0]],
+ "totals": [9540, 29.0, 200], "total_rows": 4, "sampled": false}}
