@@ -179,3 +179,27 @@ def test_bundle_refuses_second_skill_md():
     from scripts import make_bundle
     rels = ["SKILL.md", "subagents/SKILL.md"] + [r for r in make_bundle.REQUIRED if r != "SKILL.md"]
     assert any("ровно один" in p for p in make_bundle.problems(rels))
+
+
+# --- шапка SKILL.md ------------------------------------------------------
+def test_skill_frontmatter_is_strict_yaml():
+    """1.1.0 ушёл с описанием без кавычек и «: » внутри: Claude Code не разобрал шапку
+    и загрузил скилл без описания — модель его не видела."""
+    yaml = pytest.importorskip("yaml")
+    import re
+    text = open(os.path.join(ROOT, "SKILL.md"), encoding="utf-8").read()
+    m = re.match(r"^---\r?\n(.*?)\r?\n---\r?\n", text, re.S)
+    data = yaml.safe_load(m.group(1))
+    assert data["name"] == "yandex-metrika-manager"
+    assert len(data["description"]) > 100
+
+
+def test_bundle_refuses_unquoted_colon_in_frontmatter(tmp_path):
+    from scripts import make_bundle
+    (tmp_path / "SKILL.md").write_text(
+        "---\nname: x\ndescription: Аудит Метрики: цели, сегменты\n---\n", encoding="utf-8")
+    assert make_bundle.frontmatter_problems(str(tmp_path))
+    (tmp_path / "SKILL.md").write_text(
+        '---\nname: x\ndescription: "Аудит Метрики: цели, сегменты"\n---\n', encoding="utf-8")
+    assert make_bundle.frontmatter_problems(str(tmp_path)) == []
+    assert make_bundle.frontmatter_problems(ROOT) == []

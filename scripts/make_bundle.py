@@ -100,6 +100,29 @@ def problems(rels):
     return out
 
 
+def frontmatter_problems(skill_dir=SKILL_DIR):
+    """Строгий YAML (Claude Code, загрузчик claude.ai) не читает значение без кавычек
+    с «: » внутри — принимает его за новый ключ, и скилл грузится без описания.
+    Так сломался 1.1.0. Здесь без PyYAML: ловим именно этот случай."""
+    with open(os.path.join(skill_dir, "SKILL.md"), encoding="utf-8") as fh:
+        text = fh.read()
+    if not text.startswith("---"):
+        return ["SKILL.md должен начинаться с YAML-шапки в тройных дефисах"]
+    head = text.split("---", 2)[1]
+    out = []
+    for line in head.splitlines():
+        key, sep, value = line.partition(":")
+        if not sep or line[:1].isspace():
+            continue
+        value = value.strip()
+        if value[:1] in ('"', "'", ">", "|") or not value:
+            continue
+        if ": " in value or value.endswith(":"):
+            out.append("в шапке SKILL.md значение `{}` без кавычек содержит «: » — "
+                       "возьми его в двойные кавычки".format(key.strip()))
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description="Сборка zip-бандла скилла")
     ap.add_argument("--output", default=os.path.join(SKILL_DIR, SKILL_NAME + ".zip"),
@@ -107,7 +130,7 @@ def main():
     args = ap.parse_args()
 
     rels = collect()
-    errs = problems(rels)
+    errs = problems(rels) + frontmatter_problems()
     if errs:
         print("Бандл не собран:", file=sys.stderr)
         for e in errs:
