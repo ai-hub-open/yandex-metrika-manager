@@ -1,0 +1,14 @@
+# === Секреты — НИКОГДА не коммитить ===
+.env
+.env.*
+!.env.example
+
+# === Рабочие папки (содержат данные клиентов) ===
+metrika/
+
+# === Кэши и сборки ===
+__pycache__/
+*.pyc
+.pytest_cache/
+dist/
+yandex-metrika-manager.zip

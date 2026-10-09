@@ -149,3 +149,33 @@ def test_render_example(tmp_path):
     assert h.index("Директ учится на шумной цели") < h.index("теряет 31%")
     assert "ym:s:" not in h
     assert "Гипотезы для A/B" in h and "ничего не менялось" in h
+
+
+# --- make_bundle -------------------------------------------------------
+def test_bundle_real_repo_contents():
+    """Бандл из настоящего репо: VERSION и LICENSE внутри, инструменты разработки — нет."""
+    from scripts import make_bundle
+    rels = make_bundle.collect(ROOT)
+    assert make_bundle.problems(rels) == []
+    assert {"SKILL.md", "VERSION", "LICENSE"} <= set(rels)
+    leaked = [r for r in rels if r.startswith(("tests/", ".claude-plugin/", ".github/", ".pytest_cache/", "metrika/"))
+              or r in ("pytest.ini", ".gitignore", "CHANGELOG.md")]
+    assert leaked == []
+
+
+def test_bundle_skips_secrets_work_dirs_and_worktree_git_file(tmp_path):
+    from scripts import make_bundle
+    (tmp_path / "SKILL.md").write_text("---\nname: x\n---\n", encoding="utf-8")
+    (tmp_path / ".env").write_text("TOKEN=secret", encoding="utf-8")
+    (tmp_path / ".git").write_text("gitdir: D:/somewhere/.git/worktrees/x", encoding="utf-8")
+    (tmp_path / "metrika" / "client").mkdir(parents=True)
+    (tmp_path / "metrika" / "client" / "_state.json").write_text("{}", encoding="utf-8")
+    (tmp_path / ".claude-plugin").mkdir()
+    (tmp_path / ".claude-plugin" / "plugin.json").write_text("{}", encoding="utf-8")
+    assert make_bundle.collect(str(tmp_path)) == ["SKILL.md"]
+
+
+def test_bundle_refuses_second_skill_md():
+    from scripts import make_bundle
+    rels = ["SKILL.md", "subagents/SKILL.md"] + [r for r in make_bundle.REQUIRED if r != "SKILL.md"]
+    assert any("ровно один" in p for p in make_bundle.problems(rels))
