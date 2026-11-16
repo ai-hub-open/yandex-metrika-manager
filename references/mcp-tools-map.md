@@ -44,9 +44,9 @@
 - `metrics` — до 20; `dimensions` — до 10.
 - `filters` — `ym:s:lastsignTrafficSource=='ad' AND ym:s:deviceCategory=='mobile'`. Значения в одинарных кавычках. Операторы: `==`, `!=`, `=@` (содержит), `!@`, `=~` (регэксп), `!~`, `>`, `<`. Логика `AND`, `OR`, `NOT`, скобки.
 - `preset` — шаблоны: `sources_summary`, `sources_search_phrases`, `sources_direct_summary`, `tags_u_t_m`, `traffic`, `conversion`. Явные `metrics`/`dimensions` перекрывают шаблон. Удобно для первого быстрого взгляда.
-- `attribution` — `lastsign` (последний значимый, дефолт), `last`, `first`, `last_yandex_direct_click`, `cross_device_last_significant`.
+- `attribution` — `cross_device_last_significant` (последний значимый, все устройства — по умолчанию, как в интерфейсе Метрики), `last` (последний переход — визиты по клику), `cross_device_first` (первый переход), `automatic`. Старые имена (`lastsign`, `first`, модели Директа) Метрика с 25.06.2026 считает по аналогам, сервер переводит их сам — и в параметре, и в именах группировок и фильтров (`ym:s:lastsign…` → `ym:s:<модель>…`). **Задавай явно в каждом отчёте**; по какой модели посчитан ответ, говорит его поле `attribution` — по нему и подписывай число.
 - `accuracy` — `low`/`medium`/`high`/`full`. Ключевые цифры для отчёта — `full`.
-- `limit` (≤1000, дефолт 100), `offset` (с 1), `sort` (`-` — по убыванию), `include_undefined`.
+- `limit` (≤1000, дефолт 100), `offset` (с 1), `sort` (`-` — по убыванию), `include_undefined`. Пришли не все строки — в ответе `note` с `offset` следующих и `total_rows`: догрузи или пометь «данные по N из M строк»; `totals` уже посчитаны по всем строкам.
 - `direct_client_logins` — нужны для любых `ym:ad:*` метрик (расходы Директа). Логины — `chief_login` из `direct_clients_get`.
 - `currency` — валюта денежных метрик (`RUB`).
 
@@ -69,8 +69,8 @@
 | `ym:s:isNewUser` | новые/вернувшиеся |
 | `ym:s:regionCountry`, `ym:s:hour`, `ym:s:dayOfWeek`, `ym:s:browser`, `ym:s:operatingSystemRoot` | срезы |
 | `ym:s:robotPercentage`, `ym:s:percentNewVisitors`, `ym:s:goal<ID>visits` | метрики |
-| `ym:ad:clicks`, `ym:ad:visits`, `ym:ad:RUBAdCost`, `ym:ad:RUBAdCostPerVisit` | Директ: клики, визиты, расход |
-| `ym:ad:directOrder`, `ym:ad:directPhraseOrCond`, `ym:ad:directPlatformType` | группировки Директа для `ym:ad:*` |
+
+**Директ в Метрике — проверено на живом сервере 16.11.2026:** метрики `ym:ad:clicks`, `ym:ad:visits`, `ym:ad:RUBAdCost`, `ym:ad:RUBAdCostPerVisit`, группировки `ym:ad:directOrder`, `ym:ad:directPhraseOrCond`, `ym:ad:directPlatformType` (с `direct_client_logins`). Имён `ym:ad:cost`, `impressions`, `expense`, `spend` нет — `400 invalid_parameter`. `ym:ad:visits` и группировки `ym:ad:*` зависят от модели атрибуции, клики и расход — нет.
 
 **Правило неймспейсов:** в одном запросе не смешивай `ym:s:*` и `ym:ad:*` — для отчёта с расходами все группировки и метрики берутся из `ym:ad:`. Конверсии к расходу: `ym:ad:goal<ID>reaches` (сверь) или второй запрос `ym:s:` по `lastsignDirectClickOrder` и склейка по названию кампании в `metrika_table.py`.
 
@@ -93,6 +93,9 @@
 | счётчик не находится по `search` | нет доступа у этого аккаунта | попросить номер счётчика; проверить `accounts_get`; выдать доступ аккаунту |
 | `permission: view` | только просмотр | Аудит/Анализ — да, Управление — нет |
 | ответ семплирован | Метрика считала по выборке | `accuracy: "full"` для ключевых цифр или пометить приближённость |
-| unknown field / invalid metric | поле не поддерживается | убрать, записать в `unsupported_fields`, взять замену |
+| unknown field / invalid metric / `400 invalid_parameter` | неверное имя или несовместимое сочетание — **не «данных нет»** | сверить имя со справочником выше, исправить и повторить один раз; не вышло — убрать поле, записать в `unsupported_fields`, взять замену. Вывод «Метрика это не отдаёт» из такой ошибки не делать; `attribution` не убирать никогда |
+| «метрики и группировки с различными префиксами» | смешаны `ym:s:*` и `ym:ad:*` | разделить на два запроса (правило неймспейсов) |
+| пришла не та модель (поле `attribution` ответа) | модель не задана или имя группировки с другой моделью | задать `attribution` явно, имена — без модели или той же; число из ответа с чужой моделью не использовать |
 | пустые `ym:ad:*` | нет `direct_client_logins` или нет связи счётчика с Директом | `direct_clients_get`; пусто — Директ не связан (находка) |
+| проверочный запрос прошёл | подтверждено только то, что в нём было | `preset` и другие метрики не доказывают наличие кликов, расхода или нужной модели — смотри `columns` и `attribution` ответа |
 | таймаут на тяжёлом отчёте | много строк/группировок | сузить период, убрать группировку, `limit` |
