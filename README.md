@@ -77,9 +77,13 @@ click.ru. Не пересылайте его и не вставляйте в о�
 выбор способа установки ([какой способ выбрать](https://github.com/ai-hub-open/claude-plugins#какой-способ-установки-выбрать))
 и включение автообновления.
 
-**Claude Desktop — через интерфейс.** На вкладке **Code**: кнопка **+** рядом с полем ввода → **Plugins** →
-**+ Add → Add marketplace** → `ai-hub-open/claude-plugins` → **Sync** → на вкладке **Discover** нажмите
-**Add** у `yandex-metrika-manager`.
+**Claude Desktop — через интерфейс.** Нужен Git
+([как поставить](https://github.com/ai-hub-open/claude-plugins#шаг-1-установите-git)); после его установки
+перезапустите Claude Desktop. **Settings → Plugins** → **+ → Add marketplace → Add from repository** →
+`https://github.com/ai-hub-open/claude-plugins` → в каталоге **ai-hub-open** нажмите **Add** у
+`yandex-metrika-manager`. Автообновление — переключатель **Auto-update** у каталога там же, в
+**Settings → Plugins**
+([по шагам](https://github.com/ai-hub-open/claude-plugins#установка-в-claude-desktop)).
 
 **Claude Code — командами:**
 
